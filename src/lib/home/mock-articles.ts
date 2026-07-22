@@ -27,7 +27,7 @@ export const mockHomeArticles: HomeArticle[] = [
     centerPercentage: 31,
     rightPercentage: 49,
     sourceName: "Reuters",
-    publishedAt: "2026-06-01T10:00:00.000Z",
+    publishedAt: "2026-05-31T10:00:00.000Z",
   },
   {
     id: "2",

@@ -51,7 +51,7 @@ export default function HomePage() {
               <NewsCard
                 key={article.id}
                 layout="grid"
-                href="#"
+                href={`/news/${article.slug}`}
                 imageUrl={article.imageUrl}
                 imageAlt={article.imageAlt}
                 category={article.category}
