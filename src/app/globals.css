@@ -1,26 +1,111 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --text-primary: #0d0d0f;
+  --text-secondary: #6b7280;
+  --surface: #f6f6f6;
+  --bias-left: #b42318;
+  --bias-center: #e5e7eb;
+  --bias-right: #1d4ed8;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f0f0f0;
+  --border: #e5e7eb;
+  --divider: #e5e7eb;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-surface: var(--surface);
+  --color-bias-left: var(--bias-left);
+  --color-bias-center: var(--bias-center);
+  --color-bias-right: var(--bias-right);
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-border: var(--border);
+  --color-divider: var(--divider);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-sans: var(--font-poppins);
+
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-4: 16px;
+  --spacing-6: 24px;
+  --spacing-8: 32px;
+  --spacing-10: 40px;
+  --spacing-16: 64px;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.12);
+
+  --container-dailybit: 1280px;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-poppins), system-ui, sans-serif;
+}
+
+@layer utilities {
+  .text-h1 {
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  .text-h2 {
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .text-h3 {
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .text-h4 {
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+
+  .text-body-lg {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.6;
+  }
+
+  .text-body-md {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.6;
+  }
+
+  .text-body-sm {
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.6;
+  }
+
+  .text-caption {
+    font-size: 11px;
+    font-weight: 400;
+    line-height: 1.4;
+  }
+
+  .container-dailybit {
+    width: 100%;
+    max-width: var(--container-dailybit);
+    margin-inline: auto;
+    padding-inline: 24px;
+  }
 }
