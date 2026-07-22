@@ -156,7 +156,7 @@ export function SiteHeader() {
           <div className="flex flex-wrap items-center gap-2 sm:justify-end">
             <Link
               href="/sign-up"
-              className="inline-flex h-10 min-w-[110px] items-center justify-center rounded-md bg-text-primary px-5 text-body-md font-semibold text-bg-primary transition-colors hover:bg-text-primary/90"
+              className="inline-flex h-10 min-w-27.5 items-center justify-center rounded-md bg-text-primary px-5 text-body-md font-semibold text-bg-primary transition-colors hover:bg-text-primary/90"
             >
               Subscribe
             </Link>
@@ -167,13 +167,13 @@ export function SiteHeader() {
 
       <div className="border-b border-divider bg-surface">
         <div className="container-dailybit relative flex items-center gap-3 py-3">
-          <div className="pointer-events-none absolute left-0 top-0 h-full w-10 bg-gradient-to-r from-surface to-transparent" />
-          <div className="pointer-events-none absolute right-0 top-0 h-full w-10 bg-gradient-to-l from-surface to-transparent" />
+          <div className="pointer-events-none absolute left-0 top-0 h-full w-10 bg-linear-to-r from-surface to-transparent" />
+          <div className="pointer-events-none absolute right-0 top-0 h-full w-10 bg-linear-to-l from-surface to-transparent" />
           <div className="hidden h-5 w-5 flex-none items-center justify-center rounded-full border border-divider bg-bg-primary text-text-secondary lg:inline-flex">
             <span className="text-[10px] font-semibold">+</span>
           </div>
 
-          <div className="flex flex-1 items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          <div className="flex flex-1 items-center gap-2 overflow-x-auto pb-1 scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             {topicChips.map((topic, index) => (
               <Chip
                 key={topic}

@@ -10,7 +10,7 @@ export default function SignUpPage() {
   return (
     <div className="bg-surface">
       <section className="container-dailybit flex min-h-[calc(100vh-240px)] items-center justify-center py-12">
-        <div className="w-full max-w-[520px] rounded-3xl border border-border bg-bg-primary p-4 shadow-sm sm:p-6">
+        <div className="w-full max-w-130 rounded-3xl border border-border bg-bg-primary p-4 shadow-sm sm:p-6">
           <div className="mb-6 text-center">
             <p className="text-caption uppercase tracking-[0.24em] text-text-secondary">
               DailyBit access

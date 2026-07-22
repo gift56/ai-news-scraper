@@ -55,7 +55,7 @@ function NewsCardGrid({
   return (
     <article
       className={cn(
-        "overflow-hidden rounded-lg border border-border bg-bg-primary shadow-sm transition-transform transition-shadow hover:-translate-y-0.5 hover:shadow-md",
+        "overflow-hidden rounded-lg border border-border bg-bg-primary shadow-sm transition-shadow hover:-translate-y-0.5 hover:shadow-md",
         className,
       )}
     >
@@ -81,7 +81,7 @@ function NewsCardGrid({
             {category} - {region}
           </p>
 
-          <h2 className="line-clamp-2 text-[1.05rem] font-semibold leading-[1.25] text-text-primary">
+          <h2 className="line-clamp-2 text-[1.05rem] font-semibold leading-tight text-text-primary">
             {title}
           </h2>
 
