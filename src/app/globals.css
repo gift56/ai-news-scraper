@@ -25,7 +25,7 @@
   --color-border: var(--border);
   --color-divider: var(--divider);
 
-  --font-sans: var(--font-poppins);
+  --font-sans: ui-sans-serif, system-ui, sans-serif;
 
   --spacing-1: 4px;
   --spacing-2: 8px;
@@ -48,9 +48,9 @@
 }
 
 body {
-  background: var(--bg-primary);
+  background: var(--surface);
   color: var(--text-primary);
-  font-family: var(--font-poppins), system-ui, sans-serif;
+  font-family: var(--font-sans);
 }
 
 @layer utilities {

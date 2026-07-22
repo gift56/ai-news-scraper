@@ -1,18 +1,35 @@
 import type { Metadata } from "next";
-import { Poppins } from "next/font/google";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import "./globals.css";
 
-const poppins = Poppins({
-  variable: "--font-poppins",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-});
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ??
+  "https://dailybit.com";
 
 export const metadata: Metadata = {
-  title: "DailyBit — Balanced news coverage, powered by AI",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "DailyBit",
+    template: "%s | DailyBit",
+  },
   description: "Balanced news coverage, powered by AI.",
+  keywords: [
+    "DailyBit",
+    "news",
+    "AI news",
+    "balanced news coverage",
+    "political framing",
+  ],
+  applicationName: "DailyBit",
+  authors: [{ name: "DailyBit" }],
+  creator: "DailyBit",
+  publisher: "DailyBit",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
 };
 
 export default function RootLayout({
@@ -21,13 +38,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${poppins.variable} h-full antialiased`}
-      suppressHydrationWarning
-    >
+    <html lang="en" className="h-full antialiased" suppressHydrationWarning>
       <body
-        className="flex min-h-full flex-col bg-bg-primary font-sans text-text-primary"
+        className="flex min-h-full flex-col bg-surface font-sans text-text-primary"
         suppressHydrationWarning
       >
         <SiteHeader />
