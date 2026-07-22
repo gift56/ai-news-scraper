@@ -59,8 +59,8 @@ function NewsCardGrid({
         className,
       )}
     >
-      <Link href={href} className="flex flex-col">
-        <div className="relative aspect-[16/10] w-full overflow-hidden bg-bg-secondary">
+      <Link href={href} prefetch={false} className="flex flex-col">
+        <div className="relative aspect-16/10 w-full overflow-hidden bg-bg-secondary">
           <Image
             src={imageUrl}
             alt={imageAlt}
@@ -123,9 +123,10 @@ function NewsCardList({
     >
       <Link
         href={href}
+        prefetch={false}
         className="flex flex-col gap-4 p-4 sm:flex-row sm:gap-6"
       >
-        <div className="relative aspect-[16/10] w-full shrink-0 overflow-hidden rounded-md bg-bg-secondary sm:w-56 md:w-64">
+        <div className="relative aspect-16/10 w-full shrink-0 overflow-hidden rounded-md bg-bg-secondary sm:w-56 md:w-64">
           <Image
             src={imageUrl}
             alt={imageAlt}

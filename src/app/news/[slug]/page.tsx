@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
+import { auth } from "@clerk/nextjs/server";
 import {
   BookmarkIcon,
   ChevronDownIcon,
@@ -14,6 +15,8 @@ import { BiasMeter } from "@/components/ui/bias-meter";
 import { Button } from "@/components/ui/button";
 import { mockHomeArticles } from "@/lib/home/mock-articles";
 import { cn } from "@/lib/utils";
+
+export const dynamic = "force-dynamic";
 
 type PageParams = {
   params: Promise<{
@@ -114,6 +117,18 @@ export async function generateMetadata({
   params,
 }: PageParams): Promise<Metadata> {
   const { slug } = await params;
+  const { isAuthenticated } = await auth();
+
+  if (!isAuthenticated) {
+    return {
+      title: "Sign in required",
+      description: "Sign in to read DailyBit news analysis.",
+      alternates: {
+        canonical: `/news/${slug}`,
+      },
+    };
+  }
+
   const article = getArticleBySlug(slug);
 
   if (!article) {
@@ -162,6 +177,12 @@ export async function generateMetadata({
 
 export default async function NewsDetailsPage({ params }: PageParams) {
   const { slug } = await params;
+  const { isAuthenticated, redirectToSignIn } = await auth();
+
+  if (!isAuthenticated) {
+    return redirectToSignIn();
+  }
+
   const article = getArticleBySlug(slug);
 
   if (!article) {
@@ -221,7 +242,7 @@ export default async function NewsDetailsPage({ params }: PageParams) {
             </div>
 
             <div className="mt-6 overflow-hidden rounded-2xl border border-border bg-bg-primary shadow-sm">
-              <div className="relative aspect-[16/10] w-full bg-bg-secondary">
+              <div className="relative aspect-16/10 w-full bg-bg-secondary">
                 <Image
                   src={article.imageUrl}
                   alt={article.imageAlt}
@@ -505,7 +526,7 @@ export default async function NewsDetailsPage({ params }: PageParams) {
               />
             </label>
 
-            <Button className="h-12 min-w-[132px] rounded-md px-6 font-semibold">
+            <Button className="h-12 min-w-33 rounded-md px-6 font-semibold">
               Subscribe
             </Button>
           </div>
@@ -689,7 +710,11 @@ function RelatedStoryCard({
 }>) {
   return (
     <article className="rounded-xl border border-border bg-bg-primary shadow-sm transition-shadow hover:shadow-md">
-      <Link href={`/news/${article.slug}`} className="flex gap-3 p-3">
+      <Link
+        href={`/news/${article.slug}`}
+        prefetch={false}
+        className="flex gap-3 p-3"
+      >
         <div className="relative h-20 w-24 shrink-0 overflow-hidden rounded-md bg-bg-secondary sm:h-24 sm:w-28">
           <Image
             src={article.imageUrl}

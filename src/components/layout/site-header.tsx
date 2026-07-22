@@ -5,6 +5,7 @@ import {
   LocationIcon,
   MenuIcon,
 } from "@/components/icons";
+import { AuthActions } from "@/components/layout/auth-actions";
 import { Chip } from "@/components/ui/chip";
 import { cn } from "@/lib/utils";
 
@@ -154,17 +155,12 @@ export function SiteHeader() {
 
           <div className="flex flex-wrap items-center gap-2 sm:justify-end">
             <Link
-              href="#"
+              href="/sign-up"
               className="inline-flex h-10 min-w-[110px] items-center justify-center rounded-md bg-text-primary px-5 text-body-md font-semibold text-bg-primary transition-colors hover:bg-text-primary/90"
             >
               Subscribe
             </Link>
-            <Link
-              href="#"
-              className="inline-flex h-10 min-w-[88px] items-center justify-center rounded-md border border-divider bg-bg-primary px-5 text-body-md font-medium text-text-primary transition-colors hover:bg-surface"
-            >
-              Login
-            </Link>
+            <AuthActions />
           </div>
         </div>
       </div>
