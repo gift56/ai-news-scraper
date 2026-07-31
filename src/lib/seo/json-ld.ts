@@ -1,10 +1,10 @@
-import type { HomeArticle } from "@/lib/home/mock-articles";
+import type { HomeArticleRow } from "@/lib/supabase/types";
 
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ??
   "https://dailybit.com";
 
-export function buildHomeJsonLd(articles: HomeArticle[]) {
+export function buildHomeJsonLd(articles: HomeArticleRow[]) {
   const website = {
     "@context": "https://schema.org",
     "@type": "WebSite",

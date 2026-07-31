@@ -2,14 +2,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { BookmarkIcon, ClockIcon, InfoIcon } from "@/components/icons";
 import { BiasMeter } from "@/components/ui/bias-meter";
+import type { BiasLabel, SentimentLabel } from "@/lib/supabase/types";
 import { cn } from "@/lib/utils";
 
 type NewsCardBaseProps = {
   href: string;
   imageUrl: string;
-  imageAlt: string;
-  category: string;
-  region: string;
   title: string;
   leftPercentage: number;
   centerPercentage: number;
@@ -19,6 +17,9 @@ type NewsCardBaseProps = {
 
 type NewsCardListProps = NewsCardBaseProps & {
   layout?: "list";
+  imageAlt: string;
+  category: string;
+  region: string;
   summary: string;
   timeAgo: string;
   readTime: string;
@@ -27,6 +28,10 @@ type NewsCardListProps = NewsCardBaseProps & {
 type NewsCardGridProps = NewsCardBaseProps & {
   layout: "grid";
   sourceName: string;
+  sentimentLabel: SentimentLabel;
+  biasLabel: BiasLabel;
+  confidence: number;
+  publishedAt: string;
 };
 
 export type NewsCardProps = NewsCardListProps | NewsCardGridProps;
@@ -42,14 +47,15 @@ export function NewsCard(props: NewsCardProps) {
 function NewsCardGrid({
   href,
   imageUrl,
-  imageAlt,
-  category,
-  region,
   title,
   leftPercentage,
   centerPercentage,
   rightPercentage,
   sourceName,
+  sentimentLabel,
+  biasLabel,
+  confidence,
+  publishedAt,
   className,
 }: NewsCardGridProps) {
   return (
@@ -63,7 +69,7 @@ function NewsCardGrid({
         <div className="relative aspect-16/10 w-full overflow-hidden bg-bg-secondary">
           <Image
             src={imageUrl}
-            alt={imageAlt}
+            alt={title}
             fill
             className="object-cover"
             sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
@@ -77,8 +83,8 @@ function NewsCardGrid({
         </div>
 
         <div className="flex flex-col gap-3 p-4">
-          <p className="text-caption font-medium text-text-secondary">
-            {category} - {region}
+          <p className="text-caption font-medium capitalize text-text-secondary">
+            {sourceName} · {sentimentLabel}
           </p>
 
           <h2 className="line-clamp-2 text-[1.05rem] font-semibold leading-tight text-text-primary">
@@ -92,11 +98,23 @@ function NewsCardGrid({
             rightPercentage={rightPercentage}
           />
 
-          <p className="text-caption text-text-secondary">{sourceName}</p>
+          <div className="flex items-center justify-between text-caption text-text-secondary">
+            <span>{formatCardDate(publishedAt)}</span>
+            <span className="capitalize">{biasLabel}</span>
+            <span>{Math.round(confidence * 100)}% confidence</span>
+          </div>
         </div>
       </Link>
     </article>
   );
+}
+
+function formatCardDate(value: string) {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(value));
 }
 
 function NewsCardList({
