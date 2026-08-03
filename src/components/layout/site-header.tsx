@@ -8,6 +8,7 @@ import {
 import { AuthActions } from "@/components/layout/auth-actions";
 import { Chip } from "@/components/ui/chip";
 import { cn } from "@/lib/utils";
+import { Show } from "@clerk/nextjs";
 
 const themeOptions = ["Light", "Dark", "Auto"] as const;
 const primaryNav = [
@@ -154,12 +155,14 @@ export function SiteHeader() {
           </nav>
 
           <div className="flex flex-wrap items-center gap-2 sm:justify-end">
-            <Link
-              href="/sign-up"
-              className="inline-flex h-10 min-w-27.5 items-center justify-center rounded-md bg-text-primary px-5 text-body-md font-semibold text-bg-primary transition-colors hover:bg-text-primary/90"
-            >
-              Subscribe
-            </Link>
+            <Show when="signed-out">
+              <Link
+                href="/sign-up"
+                className="inline-flex h-10 min-w-27.5 items-center justify-center rounded-md bg-text-primary px-5 text-body-md font-semibold text-bg-primary transition-colors hover:bg-text-primary/90"
+              >
+                Subscribe
+              </Link>
+            </Show>
             <AuthActions />
           </div>
         </div>
