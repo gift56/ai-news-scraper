@@ -1,13 +1,16 @@
 export {
   getAnalysisByArticleId,
   getPendingAnalysisArticles,
+  getPendingEmbeddingArticles,
   insertArticleAnalysis,
+  updateArticleEmbedding,
 } from "@/lib/supabase/queries/analyses";
 
 export {
   findExistingArticleUrls,
   getArticleBySlug,
   getHomeArticles,
+  getRelatedArticles,
   insertArticle,
   markArticleAnalyzed,
   toArticleDetailRow,

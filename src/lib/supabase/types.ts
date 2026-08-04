@@ -51,6 +51,7 @@ export type ArticleAnalysisRow = {
   loaded_terms: string[];
   disclaimer: string;
   model: string;
+  embedding: number[] | null;
   created_at: string;
 };
 
@@ -108,9 +109,10 @@ export type Database = {
       };
       article_analyses: {
         Row: ArticleAnalysisRow;
-        Insert: Omit<ArticleAnalysisRow, "id" | "created_at"> & {
+        Insert: Omit<ArticleAnalysisRow, "id" | "created_at" | "embedding"> & {
           id?: string;
           created_at?: string;
+          embedding?: number[] | null;
         };
         Update: Partial<
           Database["public"]["Tables"]["article_analyses"]["Insert"]
@@ -187,6 +189,7 @@ export type ArticleDetailRow = {
   rawText: string;
   originalUrl: string;
   canonicalUrl: string;
+  hasEmbedding: boolean;
   source: {
     id: string;
     name: string;
@@ -207,6 +210,18 @@ export type ArticleDetailRow = {
     disclaimer: string;
     model: string;
   };
+};
+
+export type RelatedArticleRow = {
+  id: string;
+  title: string;
+  imageUrl: string;
+  publishedAt: string;
+  sourceName: string;
+  sourceLogoUrl: string | null;
+  sentimentLabel: SentimentLabel;
+  biasLabel: BiasLabel;
+  slug: string;
 };
 
 export type PendingAnalysisArticle = ArticleRow & {

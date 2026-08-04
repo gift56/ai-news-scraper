@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import {
@@ -11,8 +12,11 @@ import {
 } from "@/components/icons";
 import { BiasMeter } from "@/components/ui/bias-meter";
 import { Button } from "@/components/ui/button";
-import { getArticleBySlug } from "@/lib/supabase/queries/articles";
-import type { ArticleDetailRow } from "@/lib/supabase/types";
+import {
+  getArticleBySlug,
+  getRelatedArticles,
+} from "@/lib/supabase/queries/articles";
+import type { ArticleDetailRow, RelatedArticleRow } from "@/lib/supabase/types";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -98,6 +102,10 @@ export default async function NewsDetailsPage({ params }: PageParams) {
   }
 
   const paragraphs = splitParagraphs(article.rawText);
+
+  const relatedArticles = article.hasEmbedding
+    ? await getRelatedArticles(article.id)
+    : [];
 
   return (
     <div className="bg-surface">
@@ -298,6 +306,26 @@ export default async function NewsDetailsPage({ params }: PageParams) {
         </div>
       </section>
 
+      {relatedArticles.length > 0 && (
+        <section className="container-dailybit pb-10">
+          <div className="mb-6 flex items-center justify-between gap-4">
+            <div>
+              <h2 className="text-h2 text-text-primary">Related Articles</h2>
+              <p className="mt-1 text-body-sm text-text-secondary">
+                Similar stories by semantic similarity
+              </p>
+            </div>
+            <InfoIcon className="h-4 w-4 shrink-0 text-text-secondary" />
+          </div>
+
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {relatedArticles.map((related) => (
+              <RelatedArticleCard key={related.id} article={related} />
+            ))}
+          </div>
+        </section>
+      )}
+
       <section className="container-dailybit pb-10">
         <div className="rounded-2xl border border-border bg-bg-primary px-5 py-6 shadow-sm sm:px-6 lg:px-8">
           <div className="grid gap-4 lg:grid-cols-[1.5fr_1fr_auto] lg:items-center">
@@ -369,6 +397,47 @@ function formatOverallBias(article: ArticleDetailRow) {
 
 function capitalize(value: string) {
   return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
+function RelatedArticleCard({
+  article,
+}: Readonly<{ article: RelatedArticleRow }>) {
+  return (
+    <Link
+      href={`/news/${article.slug}`}
+      className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-bg-primary shadow-sm transition-shadow hover:shadow-md"
+    >
+      <div className="relative aspect-16/10 w-full bg-bg-secondary">
+        <Image
+          src={article.imageUrl}
+          alt={article.title}
+          fill
+          className="object-cover"
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+        />
+      </div>
+
+      <div className="flex flex-1 flex-col p-4">
+        <p className="text-caption text-text-secondary">{article.sourceName}</p>
+
+        <h3 className="mt-1.5 line-clamp-2 text-body-md font-semibold leading-snug text-text-primary group-hover:text-text-primary/80">
+          {article.title}
+        </h3>
+
+        <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-caption text-text-secondary">
+          <span>{formatDate(article.publishedAt)}</span>
+          <span aria-hidden="true">·</span>
+          <span className="font-medium text-text-primary">
+            {capitalize(article.sentimentLabel)}
+          </span>
+          <span aria-hidden="true">·</span>
+          <span className="font-medium text-text-primary">
+            {capitalize(article.biasLabel)}
+          </span>
+        </div>
+      </div>
+    </Link>
+  );
 }
 
 function SidebarCard({

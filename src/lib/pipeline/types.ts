@@ -4,6 +4,9 @@ export type AnalysisSummary = {
   articlesAnalyzed: number;
   articlesSkipped: number;
   articlesFailed: number;
+  embeddingsGenerated: number;
+  embeddingsFailed: number;
+  embeddingsBackfilled: number;
   batchesProcessed: number;
   totalDurationMs: number;
   failureReasons: Record<string, number>;

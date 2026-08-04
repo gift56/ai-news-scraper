@@ -9,6 +9,7 @@ import type {
   ArticleRow,
   ArticleWithRelations,
   HomeArticleRow,
+  RelatedArticleRow,
   SourceRow,
 } from "@/lib/supabase/types";
 
@@ -80,6 +81,7 @@ export function toArticleDetailRow(
     rawText: article.raw_text,
     originalUrl: article.original_url,
     canonicalUrl: article.canonical_url,
+    hasEmbedding: analysis.embedding !== null,
     source: {
       id: article.sources.id,
       name: article.sources.name,
@@ -210,6 +212,45 @@ export async function markArticleAnalyzed(
   }
 
   return data;
+}
+
+export async function getRelatedArticles(
+  articleId: string,
+  limit = 5,
+): Promise<RelatedArticleRow[]> {
+  const supabase = createSupabaseServiceRoleClient();
+  const { data, error } = await supabase.rpc("get_related_articles", {
+    p_article_id: articleId,
+    p_limit: limit,
+  });
+
+  if (error) {
+    throw new Error(`Failed to load related articles: ${error.message}`);
+  }
+
+  return (data ?? []).map(
+    (row: {
+      id: string;
+      title: string;
+      image_url: string;
+      published_at: string;
+      source_name: string;
+      source_logo_url: string | null;
+      sentiment_label: string;
+      bias_label: string;
+    }) => ({
+      id: row.id,
+      title: row.title,
+      imageUrl: row.image_url,
+      publishedAt: row.published_at,
+      sourceName: row.source_name,
+      sourceLogoUrl: row.source_logo_url,
+      sentimentLabel:
+        row.sentiment_label as RelatedArticleRow["sentimentLabel"],
+      biasLabel: row.bias_label as RelatedArticleRow["biasLabel"],
+      slug: slugify(row.title),
+    }),
+  );
 }
 
 export type { SourceRow };

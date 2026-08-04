@@ -1,6 +1,7 @@
 import "server-only";
 
 import { analyzeArticle } from "@/lib/ai/analyze";
+import { generateEmbedding } from "@/lib/ai/embedding";
 import type { AnalysisResult as ArticleAnalysis } from "@/lib/ai/schema";
 import type {
   AnalysisOptions,
@@ -9,7 +10,9 @@ import type {
 } from "@/lib/pipeline/types";
 import {
   getPendingAnalysisArticles,
+  getPendingEmbeddingArticles,
   insertArticleAnalysis,
+  updateArticleEmbedding,
 } from "@/lib/supabase/queries/analyses";
 import { markArticleAnalyzed } from "@/lib/supabase/queries/articles";
 import { insertLog } from "@/lib/supabase/queries/logs";
@@ -29,6 +32,9 @@ function createEmptySummary(): AnalysisSummary {
     articlesAnalyzed: 0,
     articlesSkipped: 0,
     articlesFailed: 0,
+    embeddingsGenerated: 0,
+    embeddingsFailed: 0,
+    embeddingsBackfilled: 0,
     batchesProcessed: 0,
     totalDurationMs: 0,
     failureReasons: {},
@@ -101,6 +107,24 @@ async function processArticle(
     return;
   }
 
+  // Generate and save embedding after analysis is inserted
+  try {
+    const embedding = await generateEmbedding(article);
+    await updateArticleEmbedding(article.id, embedding);
+    summary.embeddingsGenerated += 1;
+    console.log(
+      `[analyze] embedding saved for: ${article.title} (${article.id})`,
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error(
+      `[analyze] embedding failed for ${article.title}: ${message}`,
+    );
+    summary.embeddingsFailed += 1;
+    addFailureReason(summary, `embedding: ${message}`);
+    // Continue — article will be picked up for embedding backfill on next run
+  }
+
   try {
     await markArticleAnalyzed(article.id);
   } catch (error) {
@@ -117,6 +141,31 @@ async function processArticle(
   console.log(
     `[analyze] article analyzed: ${article.title} (${article.id}) — ${analysis.model}`,
   );
+}
+
+async function processEmbeddingBackfill(
+  article: Awaited<ReturnType<typeof getPendingEmbeddingArticles>>[number],
+  summary: AnalysisSummary,
+): Promise<void> {
+  console.log(
+    `[analyze] embedding backfill start: ${article.title} (${article.id})`,
+  );
+
+  try {
+    const embedding = await generateEmbedding(article);
+    await updateArticleEmbedding(article.id, embedding);
+    summary.embeddingsBackfilled += 1;
+    console.log(
+      `[analyze] embedding backfilled: ${article.title} (${article.id})`,
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error(
+      `[analyze] embedding backfill failed for ${article.title}: ${message}`,
+    );
+    summary.embeddingsFailed += 1;
+    addFailureReason(summary, `embedding_backfill: ${message}`);
+  }
 }
 
 export async function runAnalysisPipeline(
@@ -193,6 +242,49 @@ export async function runAnalysisPipeline(
 
     if (batch.length < remainingLimit) {
       hasMore = false;
+    }
+  }
+
+  // Embedding backfill: process articles that have analysis but no embedding
+  console.log("[analyze] starting embedding backfill");
+
+  let backfillHasMore = true;
+  while (backfillHasMore) {
+    let backfillBatch: Awaited<ReturnType<typeof getPendingEmbeddingArticles>>;
+
+    try {
+      backfillBatch = await getPendingEmbeddingArticles(batchSize);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error";
+      console.error(
+        `[analyze] failed to load pending embedding articles: ${message}`,
+      );
+      break;
+    }
+
+    if (backfillBatch.length === 0) {
+      backfillHasMore = false;
+      break;
+    }
+
+    console.log(
+      `[analyze] embedding backfill batch: ${backfillBatch.length} articles`,
+    );
+
+    for (let i = 0; i < backfillBatch.length; i++) {
+      const article = backfillBatch[i];
+      await processEmbeddingBackfill(article, summary);
+
+      if (i < backfillBatch.length - 1) {
+        console.log(
+          `[analyze] waiting ${ARTICLE_DELAY_MS / 1000}s before next embedding (rate limit safety)`,
+        );
+        await sleep(ARTICLE_DELAY_MS);
+      }
+    }
+
+    if (backfillBatch.length < batchSize) {
+      backfillHasMore = false;
     }
   }
 

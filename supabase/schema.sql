@@ -93,6 +93,23 @@ create table public.article_analyses (
 create index article_analyses_article_id_idx on public.article_analyses (article_id);
 
 -- ---------------------------------------------------------------------------
+-- pgvector: article embeddings
+-- ---------------------------------------------------------------------------
+
+-- Enable pgvector extension (run in Dashboard if not already enabled)
+create extension if not exists vector;
+
+-- Add embedding column (1536 dimensions to match Google gemini-embedding-001 with outputDimensionality: 1536)
+alter table public.article_analyses
+  add column if not exists embedding vector(1536);
+
+-- Create IVFFlat cosine index for similarity search
+create index if not exists article_analyses_embedding_idx
+  on public.article_analyses
+  using ivfflat (embedding vector_cosine_ops)
+  with (lists = 100);
+
+-- ---------------------------------------------------------------------------
 -- logs
 -- ---------------------------------------------------------------------------
 
@@ -199,3 +216,48 @@ grant select on public.article_analyses to anon, authenticated;
 
 grant all on all tables in schema public to service_role;
 grant all on all sequences in schema public to service_role;
+
+-- ---------------------------------------------------------------------------
+-- pgvector: related articles RPC function
+-- ---------------------------------------------------------------------------
+
+create or replace function public.get_related_articles(
+  p_article_id uuid,
+  p_limit int default 5
+)
+returns table (
+  id uuid,
+  title text,
+  image_url text,
+  published_at timestamptz,
+  source_name text,
+  source_logo_url text,
+  sentiment_label text,
+  bias_label text
+)
+language sql
+stable
+security definer
+as $$
+  select
+    a.id,
+    a.title,
+    a.image_url,
+    a.published_at,
+    s.name as source_name,
+    s.logo_url as source_logo_url,
+    aa.sentiment_label,
+    aa.bias_label
+  from public.article_analyses aa
+  join public.articles a on a.id = aa.article_id
+  join public.sources s on s.id = a.source_id
+  where aa.embedding is not null
+    and a.analyzed_at is not null
+    and a.id != p_article_id
+  order by aa.embedding <=> (
+    select embedding from public.article_analyses where article_id = p_article_id
+  )
+  limit p_limit;
+$$;
+
+grant execute on function public.get_related_articles(uuid, int) to anon, authenticated;

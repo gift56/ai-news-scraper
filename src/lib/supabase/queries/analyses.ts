@@ -10,24 +10,31 @@ import type {
 const PENDING_ARTICLE_SELECT = `
   *,
   sources (*),
-  article_analyses ( id )
+  article_analyses ( id, embedding )
 `;
 
 function isPendingAnalysisArticle(
   article: PendingAnalysisArticle & {
-    article_analyses: { id: string } | { id: string }[] | null;
+    article_analyses:
+      | { id: string; embedding: number[] | null }
+      | { id: string; embedding: number[] | null }[]
+      | null;
   },
 ): boolean {
   const relation = article.article_analyses;
 
+  // No analysis row at all — needs full analysis
   if (!relation) {
     return true;
   }
 
   if (Array.isArray(relation)) {
+    // No analysis rows — needs full analysis
     return relation.length === 0;
   }
 
+  // Has analysis row — does NOT need full analysis
+  // (embedding backfill is handled separately by getPendingEmbeddingArticles)
   return false;
 }
 
@@ -131,4 +138,57 @@ export async function getAnalysisByArticleId(
   }
 
   return data;
+}
+
+export async function updateArticleEmbedding(
+  articleId: string,
+  embedding: number[],
+): Promise<void> {
+  const supabase = createSupabaseServiceRoleClient();
+  const { error } = await supabase
+    .from("article_analyses")
+    .update({ embedding })
+    .eq("article_id", articleId);
+
+  if (error) {
+    throw new Error(
+      `Failed to update embedding for article ${articleId}: ${error.message}`,
+    );
+  }
+}
+
+export async function getPendingEmbeddingArticles(
+  limit = 50,
+): Promise<PendingAnalysisArticle[]> {
+  const supabase = createSupabaseServiceRoleClient();
+  const fetchLimit = Math.max(limit * 3, limit);
+  const { data, error } = await supabase
+    .from("articles")
+    .select(PENDING_ARTICLE_SELECT)
+    .order("scraped_at", { ascending: true })
+    .limit(fetchLimit);
+
+  if (error) {
+    throw new Error(
+      `Failed to load pending embedding articles: ${error.message}`,
+    );
+  }
+
+  return (data ?? [])
+    .filter((article) => {
+      const relation = article.article_analyses;
+
+      // Only include articles that have an analysis row but embedding is null
+      if (!relation) {
+        return false;
+      }
+
+      if (Array.isArray(relation)) {
+        return relation.length > 0 && relation[0]?.embedding === null;
+      }
+
+      return relation.embedding === null;
+    })
+    .slice(0, limit)
+    .map(({ article_analyses: _analysis, ...article }) => article);
 }
