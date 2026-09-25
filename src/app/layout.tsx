@@ -10,6 +10,11 @@ const siteUrl =
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
+  icons: {
+    icon: [{ url: "/favicon.png", type: "image/png" }, { url: "/favicon.ico", type: "image/x-icon" }],
+    shortcut: "/favicon.png",
+    apple: "/favicon.png",
+  },
   title: {
     default: "DailyBit",
     template: "%s | DailyBit",
